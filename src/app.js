@@ -2,6 +2,7 @@ import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 
 const app = express()
+app.use(express.json())
 
 const books = [
     {
@@ -20,6 +21,12 @@ app.get('/', (_req, res) => {
 
 app.get('/books', (_req, res) => {
     res.status(StatusCodes.OK).json(books)
+})
+
+app.post('/books', (req, res) => {
+    books.push(req.body)
+
+    res.status(StatusCodes.CREATED).json(req.body)
 })
 
 export default app
