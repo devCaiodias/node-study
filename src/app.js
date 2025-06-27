@@ -1,22 +1,24 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
+import connecteDb from './db/dbConnect.js'
+import books from './models/Books.js'
+
+const db = await connecteDb()
+
+db.on('error', (erro) => {
+    console.error('Erro ao conectar ao banco de dados:', erro)
+})
+
+db.once('open', () => {
+    console.log('Banco de dados conectado com sucesso!')
+})
 
 const app = express()
 app.use(express.json())
 
-const books = [
-    {
-        id: 1,
-        title: 'Codigo Limpo',
-    },
-    {
-        id: 2,
-        title: 'Principios SOLID',
-    }
-]
-
-app.get('/books', (_req, res) => {
-    res.status(StatusCodes.OK).json(books)
+app.get('/books', async (_req, res) => {
+    const getBooks = await books.find({})
+    res.status(StatusCodes.OK).json(getBooks)
 })
 
 app.get('/books/:id', (req, res) => {
