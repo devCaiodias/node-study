@@ -2,6 +2,7 @@ import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 import connecteDb from './db/dbConnect.js'
 import books from './models/Books.js'
+import BooksController from './Controllers/booksControllers.js'
 
 const db = await connecteDb()
 
@@ -15,11 +16,6 @@ db.once('open', () => {
 
 const app = express()
 app.use(express.json())
-
-app.get('/books', async (_req, res) => {
-    const getBooks = await books.find({})
-    res.status(StatusCodes.OK).json(getBooks)
-})
 
 app.get('/books/:id', (req, res) => {
     const booksId = req.params.id
