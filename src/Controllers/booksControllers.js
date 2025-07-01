@@ -1,3 +1,4 @@
+import { author } from '../models/Author.js';
 import books from './../models/Books.js'
 
 class BooksController {
@@ -10,45 +11,63 @@ class BooksController {
       }
     }
 
-    static async postBooks(req, res) {
-      try {
-        const newBook = await books.create(req.body)
-        res.status(201).json(newBook);
-      } catch (error) {
-        res.status(500).json({ message: 'Erro ao criar livro', error: error.message });
-      }  
+    static async getBooksId(req, res) {
+        try {
+          const booksId = req.params.id
+          const book = await books.findById(booksId)
+          
+          res.status(200).json(book)
+          
+        } catch (error) {
+          res.status(500).json({ message: 'Error getting book', error: error.message });
+        }
     }
 
-//     app.get('/books/:id', (req, res) => {
-//     const booksId = req.params.id
-//     const book = books.findIndex(book => book.id === Number(booksId))
+    static async postBooks(req, res) {
+      const newBook = req.body;
+      try {
+        const authorFound = await author.findById(newBook.author)
+        const bookFull = {
+          ...newBook, author: {...authorFound._doc}
+        }
+        const createdBook = await books.create(bookFull);
+        res.status(201).json(createdBook);
+      } catch (error) {
+        res.status(500).json({ message: 'Erro create book', error: error.message });
+      }  
+    }
+    static async putBooks(req, res) {
+      try {
+        const booksId = req.params.id
+        await books.findByIdAndUpdate(booksId, req.body)
+
+        res.status(200).json({ message: 'book updated with sucesso!' });
+        
+      } catch (error) {
+        res.status(500).json({ message: 'Erro upadated the book', error: error.message });
+      }
+    }
     
-//     res.status(StatusCodes.OK).json(books[book])
-// })
+    static async deleteBooks(req, res) {
+      try {
+        const booksId = req.params.id
+        await books.findByIdAndDelete(booksId)
 
-// app.post('/books', (req, res) => {
-//     books.push(req.body)
+        res.status(204).json({ message: 'Book deleted successfully!' });
+      } catch (error) {
+        res.status(500).json({ message: 'Erro deleting the book', error: error.message });
+      } 
+    }
 
-//     res.status(StatusCodes.CREATED).json(req.body)
-// })
-
-// app.put('/books/:id', (req, res) => {
-//     const booksId = req.params.id
-//     const bookIndex = books.findIndex(book => book.id === Number(booksId))
-//     books[bookIndex].title = req.body.title
-
-//     res.status(StatusCodes.OK).json(books)
-    
-// })
-
-// app.delete('/books/:id', (req, res) => {
-//     const booksId = req.params.id
-//     const bookIndex = books.findIndex(book => book.id === Number(booksId))
-
-//     books.splice(bookIndex, 1)
-
-//     res.status(StatusCodes.NO_CONTENT).json({mesage: 'Livro removido com sucesso!'})
-// })
+    static async getBooksParams(req, res) {
+      const title = req.query.title
+      try {
+        const booksForTitle = await books.find({ title})
+        res.status(200).json(booksForTitle)
+      } catch (error) {
+        res.status(500).json({ message: 'Erro getting books by title', error: error.message });
+      }
+    }
 }
 
 export default BooksController;
